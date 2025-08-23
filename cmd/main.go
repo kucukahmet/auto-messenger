@@ -1,7 +1,9 @@
 package main
 
 import (
+	"auto-messager/config"
 	"auto-messager/internal/api"
+	"auto-messager/internal/storage"
 	"auto-messager/internal/worker"
 	"context"
 	"fmt"
@@ -14,12 +16,25 @@ import (
 )
 
 func main() {
+	config, err := config.Load()
 
-	listener := worker.NewListener(5)
-	router := api.Router(listener)
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+		return
+	}
+
+	listener := worker.NewListener(int32(config.PERIOD))
+	db, err := storage.InitPostgre(config.DB_URI)
+
+	if err != nil {
+		log.Fatalf("Failed to initialize PostgreSQL: %v", err)
+		return
+	}
+
+	router := api.Router(listener, db)
 
 	server := &http.Server{
-		Addr:         ":8081",
+		Addr:         ":" + config.HTTP_PORT,
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -27,7 +42,7 @@ func main() {
 	}
 
 	go func() {
-		log.Printf("Server starting on port %s", "8081")
+		log.Printf("Server starting on port %s", config.HTTP_PORT)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Failed to start server: %v", err)
 		}
