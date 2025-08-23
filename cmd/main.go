@@ -2,6 +2,7 @@ package main
 
 import (
 	"auto-messager/internal/api"
+	"auto-messager/internal/worker"
 	"context"
 	"fmt"
 	"log"
@@ -13,7 +14,10 @@ import (
 )
 
 func main() {
-	router := api.Router()
+
+	listener := worker.NewListener(5)
+	router := api.Router(listener)
+
 	server := &http.Server{
 		Addr:         ":8081",
 		Handler:      router,
