@@ -47,12 +47,14 @@ func (listener *Listener) Start() {
 	}()
 }
 
-func (listener *Listener) Stop() {
+func (listener *Listener) Stop() error {
 	listener.mutex.Lock()
 	defer listener.mutex.Unlock()
-	if listener.isRunning {
-		return
+	if !listener.isRunning {
+		return fmt.Errorf("listener is not running")
 	}
-	listener.isRunning = false
 	close(listener.stopChan)
+	listener.waitGroup.Wait()
+	listener.isRunning = false
+	return nil
 }

@@ -13,6 +13,7 @@ func Router(listener *worker.Listener) http.Handler {
 
 	router.Get("/ping", handler.Ping)
 	router.Get("/start-listener", handler.StartListener)
+	router.Get("/stop-listener", handler.StopListener)
 
 	return router
 }

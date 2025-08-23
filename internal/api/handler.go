@@ -34,3 +34,14 @@ func (handler *Handlers) StartListener(writer http.ResponseWriter, request *http
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(response)
 }
+
+func (handler *Handlers) StopListener(writer http.ResponseWriter, request *http.Request) {
+	handler.listener.Stop()
+	response := map[string]interface{}{
+		"status":  "ok",
+		"message": "Stoped listener",
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(response)
+}
