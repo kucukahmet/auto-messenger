@@ -31,6 +31,12 @@ func main() {
 		return
 	}
 
+	err = storage.ExecSchema(db)
+	if err != nil {
+		log.Fatalf("Failed to execute schema: %v", err)
+		return
+	}
+
 	router := api.Router(listener, db)
 
 	server := &http.Server{

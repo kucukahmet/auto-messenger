@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -22,4 +23,15 @@ func InitPostgre(dbUri string) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func ExecSchema(db *sql.DB) error {
+	schemaFile, err := os.ReadFile("db/schema.sql")
+	if err != nil {
+		return fmt.Errorf("failed read schema: %w", err)
+	}
+	if _, err := db.Exec(string(schemaFile)); err != nil {
+		return fmt.Errorf("failed to execute schema: %w", err)
+	}
+	return nil
 }
