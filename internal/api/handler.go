@@ -20,13 +20,12 @@ func NewHandlers(app *app.App, listener *worker.Listener) *Handlers {
 
 // Ping godoc
 // @Summary      Health check
-// @Description  Returns simple pong response with server and listener status
+// @Description  Returns simple pong response with server and listener status. You can also learn the API version.
 // @Tags         health
 // @Produce      json
-// @Success      200 {object} map[string]interface{}
+// @Success      200 {object} api.HealthResponse
 // @Router       /ping [get]
 func (handler *Handlers) Ping(writer http.ResponseWriter, request *http.Request) {
-
 	listenerIsRunning := handler.listener.IsRunning()
 
 	response := map[string]interface{}{
@@ -34,6 +33,8 @@ func (handler *Handlers) Ping(writer http.ResponseWriter, request *http.Request)
 		"httpServer":        true,
 		"listenerIsRunning": listenerIsRunning,
 		"message":           "pong",
+		"apiVersion":        handler.app.Config.API_VERSION,
+		"buildVersion":      handler.app.Config.BUILD_VERSION,
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
@@ -43,11 +44,22 @@ func (handler *Handlers) Ping(writer http.ResponseWriter, request *http.Request)
 // StartListener godoc
 // @Summary      Start Listener
 // @Description  Starts the automatic message sending loop
+// @Tags         listener
 // @Produce      json
-// @Success      200 {object} map[string]interface{} "started"
-// @Failure      409 {string} string "already running"
-// @Router       /start-listener [get]
+// @Success      200 {object} api.SimpleResponse "started"
+// @Failure      409 {object} api.ErrorResponse "already running"
+// @Router       /api/start-listener [get]
 func (handler *Handlers) StartListener(writer http.ResponseWriter, request *http.Request) {
+	if handler.listener.IsRunning() {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusConflict)
+		_ = json.NewEncoder(writer).Encode(ErrorResponse{
+			Status:  "error",
+			Message: "Already running",
+		})
+		return
+	}
+
 	handler.listener.Start()
 	response := map[string]interface{}{
 		"status":  "ok",
@@ -61,11 +73,22 @@ func (handler *Handlers) StartListener(writer http.ResponseWriter, request *http
 // StopListener godoc
 // @Summary      Stop Listener
 // @Description  Stops the automatic message sending loop
+// @Tags         listener
 // @Produce      json
-// @Success      200 {object} map[string]interface{} "stopped"
-// @Failure      409 {string} string "not running"
-// @Router       /stop-listener [get]
+// @Success      200 {object} api.SimpleResponse "stopped"
+// @Failure      409 {object} api.ErrorResponse "not running"
+// @Router       /api/stop-listener [get]
 func (handler *Handlers) StopListener(writer http.ResponseWriter, request *http.Request) {
+	if !handler.listener.IsRunning() {
+		writer.Header().Set("Content-Type", "application/json")
+		writer.WriteHeader(http.StatusConflict)
+		_ = json.NewEncoder(writer).Encode(ErrorResponse{
+			Status:  "error",
+			Message: "Not running",
+		})
+		return
+	}
+
 	handler.listener.Stop()
 	response := map[string]interface{}{
 		"status":  "ok",
@@ -81,11 +104,11 @@ func (handler *Handlers) StopListener(writer http.ResponseWriter, request *http.
 // @Description  Returns a paginated list of sent messages
 // @Tags         messages
 // @Produce      json
-// @Param        limit  query     int  false "Number of messages to return (default 20, max 100)"
-// @Param        offset query     int  false "Offset for pagination (default 0)"
-// @Success 200 {array} api.MessageResponse
-// @Failure      500    {string}  string "Failed to retrieve messages"
-// @Router       /messages/sent [get]
+// @Param        limit   query     int  false "Number of messages to return (default 20, max 100)"
+// @Param        offset  query     int  false "Offset for pagination (default 0)"
+// @Success      200     {object}  api.PaginatedMessagesResponse
+// @Failure      500     {object}  api.ErrorResponse "Failed to retrieve messages"
+// @Router       /api/messages/sent [get]
 func (handler *Handlers) ListSentMessages(writer http.ResponseWriter, request *http.Request) {
 	limitStr := request.URL.Query().Get("limit")
 	offsetStr := request.URL.Query().Get("offset")

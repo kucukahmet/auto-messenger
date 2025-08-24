@@ -1,4 +1,34 @@
 definitions:
+  api.ErrorResponse:
+    properties:
+      message:
+        example: Error message
+        type: string
+      status:
+        example: error
+        type: string
+    type: object
+  api.HealthResponse:
+    properties:
+      apiVersion:
+        example: v1
+        type: string
+      buildVersion:
+        example: 1.2.3
+        type: string
+      httpServer:
+        example: true
+        type: boolean
+      listenerIsRunning:
+        example: true
+        type: boolean
+      message:
+        example: pong
+        type: string
+      status:
+        example: ok
+        type: string
+    type: object
   api.MessageResponse:
     properties:
       content:
@@ -22,10 +52,41 @@ definitions:
       updated_at:
         type: string
     type: object
+  api.PaginatedMessagesResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/api.MessageResponse'
+        type: array
+      limit:
+        example: 20
+        type: integer
+      offset:
+        example: 0
+        type: integer
+      returned_count:
+        example: 20
+        type: integer
+      status:
+        example: ok
+        type: string
+    type: object
+  api.SimpleResponse:
+    properties:
+      isRunning:
+        example: true
+        type: boolean
+      message:
+        example: Started listener
+        type: string
+      status:
+        example: ok
+        type: string
+    type: object
 info:
   contact: {}
 paths:
-  /messages/sent:
+  /api/messages/sent:
     get:
       description: Returns a paginated list of sent messages
       parameters:
@@ -43,47 +104,15 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/api.MessageResponse'
-            type: array
+            $ref: '#/definitions/api.PaginatedMessagesResponse'
         "500":
           description: Failed to retrieve messages
           schema:
-            type: string
+            $ref: '#/definitions/api.ErrorResponse'
       summary: List sent messages
       tags:
       - messages
-  /ping:
-    get:
-      description: Returns simple pong response with server and listener status
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Health check
-      tags:
-      - health
-  /stop-listener:
-    get:
-      description: Stops the automatic message sending loop
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: stopped
-          schema:
-            additionalProperties: true
-            type: object
-        "409":
-          description: not running
-          schema:
-            type: string
-      summary: Stop Listener
-  /tastart-listener:
+  /api/start-listener:
     get:
       description: Starts the automatic message sending loop
       produces:
@@ -92,11 +121,43 @@ paths:
         "200":
           description: started
           schema:
-            additionalProperties: true
-            type: object
+            $ref: '#/definitions/api.SimpleResponse'
         "409":
           description: already running
           schema:
-            type: string
+            $ref: '#/definitions/api.ErrorResponse'
       summary: Start Listener
+      tags:
+      - listener
+  /api/stop-listener:
+    get:
+      description: Stops the automatic message sending loop
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: stopped
+          schema:
+            $ref: '#/definitions/api.SimpleResponse'
+        "409":
+          description: not running
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Stop Listener
+      tags:
+      - listener
+  /ping:
+    get:
+      description: Returns simple pong response with server and listener status. You
+        can also learn the API version.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/api.HealthResponse'
+      summary: Health check
+      tags:
+      - health
 swagger: "2.0"

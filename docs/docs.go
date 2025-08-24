@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/messages/sent": {
+        "/api/messages/sent": {
             "get": {
                 "description": "Returns a paginated list of sent messages",
                 "produces": [
@@ -43,16 +43,65 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/api.MessageResponse"
-                            }
+                            "$ref": "#/definitions/api.PaginatedMessagesResponse"
                         }
                     },
                     "500": {
                         "description": "Failed to retrieve messages",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/start-listener": {
+            "get": {
+                "description": "Starts the automatic message sending loop",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listener"
+                ],
+                "summary": "Start Listener",
+                "responses": {
+                    "200": {
+                        "description": "started",
+                        "schema": {
+                            "$ref": "#/definitions/api.SimpleResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "already running",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/stop-listener": {
+            "get": {
+                "description": "Stops the automatic message sending loop",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "listener"
+                ],
+                "summary": "Stop Listener",
+                "responses": {
+                    "200": {
+                        "description": "stopped",
+                        "schema": {
+                            "$ref": "#/definitions/api.SimpleResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "not running",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
                         }
                     }
                 }
@@ -60,7 +109,7 @@ const docTemplate = `{
         },
         "/ping": {
             "get": {
-                "description": "Returns simple pong response with server and listener status",
+                "description": "Returns simple pong response with server and listener status. You can also learn the API version.",
                 "produces": [
                     "application/json"
                 ],
@@ -72,56 +121,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/stop-listener": {
-            "get": {
-                "description": "Stops the automatic message sending loop",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Stop Listener",
-                "responses": {
-                    "200": {
-                        "description": "stopped",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "409": {
-                        "description": "not running",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/tastart-listener": {
-            "get": {
-                "description": "Starts the automatic message sending loop",
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Start Listener",
-                "responses": {
-                    "200": {
-                        "description": "started",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    },
-                    "409": {
-                        "description": "already running",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/api.HealthResponse"
                         }
                     }
                 }
@@ -129,6 +129,48 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "api.ErrorResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Error message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "error"
+                }
+            }
+        },
+        "api.HealthResponse": {
+            "type": "object",
+            "properties": {
+                "apiVersion": {
+                    "type": "string",
+                    "example": "v1"
+                },
+                "buildVersion": {
+                    "type": "string",
+                    "example": "1.2.3"
+                },
+                "httpServer": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "listenerIsRunning": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "message": {
+                    "type": "string",
+                    "example": "pong"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
         "api.MessageResponse": {
             "type": "object",
             "properties": {
@@ -161,6 +203,50 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "api.PaginatedMessagesResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/api.MessageResponse"
+                    }
+                },
+                "limit": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "offset": {
+                    "type": "integer",
+                    "example": 0
+                },
+                "returned_count": {
+                    "type": "integer",
+                    "example": 20
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
+                }
+            }
+        },
+        "api.SimpleResponse": {
+            "type": "object",
+            "properties": {
+                "isRunning": {
+                    "type": "boolean",
+                    "example": true
+                },
+                "message": {
+                    "type": "string",
+                    "example": "Started listener"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
                 }
             }
         }
