@@ -15,6 +15,7 @@ func Router(app *app.App, listener *worker.Listener) http.Handler {
 	router.Get("/ping", handler.Ping)
 	router.Get("/start-listener", handler.StartListener)
 	router.Get("/stop-listener", handler.StopListener)
+	router.Get("/list-sent-messages", handler.ListSentMessages)
 
 	return router
 }
