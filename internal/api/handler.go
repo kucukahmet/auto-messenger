@@ -1,19 +1,19 @@
 package api
 
 import (
+	"auto-messager/internal/app"
 	"auto-messager/internal/worker"
-	"database/sql"
 	"encoding/json"
 	"net/http"
 )
 
 type Handlers struct {
+	app      *app.App
 	listener *worker.Listener
-	storage  *sql.DB
 }
 
-func NewHandlers(listener *worker.Listener, db *sql.DB) *Handlers {
-	return &Handlers{listener: listener, storage: db}
+func NewHandlers(app *app.App, listener *worker.Listener) *Handlers {
+	return &Handlers{app: app, listener: listener}
 }
 
 func (handler *Handlers) Ping(writer http.ResponseWriter, request *http.Request) {

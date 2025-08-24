@@ -1,14 +1,15 @@
 package worker
 
 import (
+	"auto-messager/internal/app"
 	"fmt"
 	"time"
 )
 
-func NewListener(period int32) *Listener {
+func NewListener(app *app.App) *Listener {
 	return &Listener{
 		isRunning: false,
-		period:    period,
+		app:       app,
 		stopChan:  make(chan struct{}),
 	}
 }
@@ -31,13 +32,14 @@ func (listener *Listener) Start() {
 
 	go func() {
 		defer listener.waitGroup.Done()
-		ticker := time.NewTicker(time.Duration(listener.period) * time.Second)
+		ticker := time.NewTicker(time.Duration(listener.app.Config.PERIOD) * time.Second)
 		defer ticker.Stop()
 
 		for {
 			select {
 			case <-ticker.C:
 				fmt.Println("Listener tick ...")
+				listener.action()
 
 			case <-listener.stopChan:
 				fmt.Println("Listener stopping ...")
@@ -57,4 +59,12 @@ func (listener *Listener) Stop() error {
 	listener.waitGroup.Wait()
 	listener.isRunning = false
 	return nil
+}
+
+func (listener *Listener) action() {
+	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	// defer cancel()
+
+	// storage.GetPendingForUpdate(ctx, listener.period)
+
 }

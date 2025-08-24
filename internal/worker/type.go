@@ -1,10 +1,13 @@
 package worker
 
-import "sync"
+import (
+	"auto-messager/internal/app"
+	"sync"
+)
 
 type Listener struct {
 	isRunning bool
-	period    int32
+	app       *app.App
 	mutex     sync.Mutex
 	waitGroup sync.WaitGroup
 	stopChan  chan struct{}

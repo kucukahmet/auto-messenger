@@ -1,16 +1,16 @@
 package api
 
 import (
+	"auto-messager/internal/app"
 	"auto-messager/internal/worker"
-	"database/sql"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func Router(listener *worker.Listener, db *sql.DB) http.Handler {
+func Router(app *app.App, listener *worker.Listener) http.Handler {
 	router := chi.NewRouter()
-	handler := NewHandlers(listener, db)
+	handler := NewHandlers(app, listener)
 
 	router.Get("/ping", handler.Ping)
 	router.Get("/start-listener", handler.StartListener)
