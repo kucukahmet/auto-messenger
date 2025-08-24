@@ -1,6 +1,27 @@
 version: "3.9"
 
 services:
+  app:
+    build: .
+    container_name: auto-messenger
+    depends_on:
+      - db
+      - redis
+    ports:
+      - "${HTTP_PORT}:8081"
+    environment:
+      HTTP_PORT: ${HTTP_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_HOST: db
+      REDIS_HOST: redis
+      REDIS_PORT: ${REDIS_PORT}
+      PERIOD: ${PERIOD}
+      BATCH_SIZE: ${BATCH_SIZE}
+      EXTERNAL_API_URL: ${EXTERNAL_API_URL}
+
   db:
     image: postgres:17
     environment:
