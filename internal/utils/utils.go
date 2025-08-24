@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type OutboundPayload struct {
@@ -14,8 +16,8 @@ type OutboundPayload struct {
 }
 
 type WebhookResponse struct {
-	Message   string `json:"message"`
-	MessageID string `json:"messageId"`
+	Message   string      `json:"message"`
+	MessageID pgtype.Text `json:"messageId"`
 }
 
 func BuildPayloadFromMessage(msg *storage.Message) ([]byte, error) {

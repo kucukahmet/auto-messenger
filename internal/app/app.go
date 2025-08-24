@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 type App struct {
@@ -18,6 +19,7 @@ type App struct {
 	Queries *storage.Queries
 	Service *service.MessageService
 	HTTP    *http.Server
+	Cache   *redis.Client
 }
 
 func NewApp(ctx context.Context, config *config.Config) (*App, error) {
@@ -25,6 +27,12 @@ func NewApp(ctx context.Context, config *config.Config) (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	redisdb, err := storage.InitRedis(config.REDIS_URI)
+	if err != nil {
+		return nil, err
+	}
+
 	queries := storage.New(db)
 	messageService := service.NewMessageService(config.EXTERNAL_API_URL)
 
@@ -33,6 +41,7 @@ func NewApp(ctx context.Context, config *config.Config) (*App, error) {
 		DB:      db,
 		Queries: queries,
 		Service: messageService,
+		Cache:   redisdb,
 	}, nil
 }
 

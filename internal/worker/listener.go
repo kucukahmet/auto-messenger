@@ -108,6 +108,10 @@ func (listener *Listener) action() {
 				fmt.Printf("Error parsing response for message ID %d: %v\n", msg.ID, err)
 				return
 			}
+			listener.app.Queries.MarkSent(ctx, storage.MarkSentParams{
+				ID:                msg.ID,
+				ResponseMessageID: wresponse.MessageID,
+			})
 			fmt.Printf("Sent message ID %d, response status: %v -> %v\n", msg.ID, wresponse.Message, wresponse.MessageID)
 
 			fmt.Println("Processing message ID:", msg.ID)

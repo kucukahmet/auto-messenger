@@ -16,6 +16,8 @@ type Config struct {
 	POSTGRES_DB       string
 	POSTGRES_PORT     string
 	REDIS_PORT        string
+	REDIS_HOST        string
+	REDIS_URI         string
 	PERIOD            int
 	BATCH_SIZE        int
 	EXTERNAL_API_URL  string
@@ -38,6 +40,7 @@ func Load() (*Config, error) {
 	postgresPort := getEnv("POSTGRES_PORT", "5432")
 	postgresHost := getEnv("POSTGRES_HOST", "localhost")
 	redisPort := getEnv("REDIS_PORT", "6379")
+	redisHost := getEnv("REDIS_HOST", "localhost")
 
 	period, _ := strconv.Atoi(getEnv("PERIOD", "120"))
 	batchSize, _ := strconv.Atoi(getEnv("BATCH_SIZE", "2"))
@@ -51,6 +54,8 @@ func Load() (*Config, error) {
 		postgresDb,
 	)
 
+	redisUri := fmt.Sprintf("%s:%s", redisHost, redisPort)
+
 	return &Config{
 		HTTP_PORT:         httpPort,
 		DB_URI:            dbUri,
@@ -59,6 +64,8 @@ func Load() (*Config, error) {
 		POSTGRES_DB:       postgresDb,
 		POSTGRES_PORT:     postgresPort,
 		REDIS_PORT:        redisPort,
+		REDIS_HOST:        redisHost,
+		REDIS_URI:         redisUri,
 		PERIOD:            period,
 		BATCH_SIZE:        batchSize,
 		EXTERNAL_API_URL:  externalApiUrl,
