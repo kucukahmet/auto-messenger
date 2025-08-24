@@ -1,0 +1,102 @@
+definitions:
+  api.MessageResponse:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      fail_reason:
+        type: string
+      id:
+        type: integer
+      phone_number:
+        type: string
+      response_message_id:
+        type: string
+      retry_count:
+        type: integer
+      sent_at:
+        type: string
+      status:
+        type: string
+      updated_at:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /messages/sent:
+    get:
+      description: Returns a paginated list of sent messages
+      parameters:
+      - description: Number of messages to return (default 20, max 100)
+        in: query
+        name: limit
+        type: integer
+      - description: Offset for pagination (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/api.MessageResponse'
+            type: array
+        "500":
+          description: Failed to retrieve messages
+          schema:
+            type: string
+      summary: List sent messages
+      tags:
+      - messages
+  /ping:
+    get:
+      description: Returns simple pong response with server and listener status
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Health check
+      tags:
+      - health
+  /stop-listener:
+    get:
+      description: Stops the automatic message sending loop
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: stopped
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: not running
+          schema:
+            type: string
+      summary: Stop Listener
+  /tastart-listener:
+    get:
+      description: Starts the automatic message sending loop
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: started
+          schema:
+            additionalProperties: true
+            type: object
+        "409":
+          description: already running
+          schema:
+            type: string
+      summary: Start Listener
+swagger: "2.0"
