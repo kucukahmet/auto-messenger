@@ -3,6 +3,7 @@ package worker
 import (
 	"auto-messager/internal/app"
 	"auto-messager/internal/storage"
+	"auto-messager/internal/utils"
 	"context"
 	"fmt"
 	"log"
@@ -89,6 +90,26 @@ func (listener *Listener) action() {
 		waitGroup.Add(1)
 		go func(msg storage.Message) {
 			defer waitGroup.Done()
+
+			payload, err := utils.BuildPayloadFromMessage(&msg)
+			if err != nil {
+				fmt.Printf("Error building payload for message ID %d: %v\n", msg.ID, err)
+				return
+			}
+
+			response, err := listener.app.Service.SendMessage(payload)
+			if err != nil {
+				fmt.Printf("Error sending message ID %d: %v\n", msg.ID, err)
+				return
+			}
+
+			wresponse, err := utils.ParseWebhookResponse(response)
+			if err != nil {
+				fmt.Printf("Error parsing response for message ID %d: %v\n", msg.ID, err)
+				return
+			}
+			fmt.Printf("Sent message ID %d, response status: %v -> %v\n", msg.ID, wresponse.Message, wresponse.MessageID)
+
 			fmt.Println("Processing message ID:", msg.ID)
 		}(message)
 	}

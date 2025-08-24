@@ -18,6 +18,7 @@ type Config struct {
 	REDIS_PORT        string
 	PERIOD            int
 	BATCH_SIZE        int
+	EXTERNAL_API_URL  string
 }
 
 func getEnv(key, defaultValue string) string {
@@ -40,6 +41,7 @@ func Load() (*Config, error) {
 
 	period, _ := strconv.Atoi(getEnv("PERIOD", "120"))
 	batchSize, _ := strconv.Atoi(getEnv("BATCH_SIZE", "2"))
+	externalApiUrl := getEnv("EXTERNAL_API_URL", "")
 
 	dbUri := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
 		postgresUser,
@@ -59,5 +61,6 @@ func Load() (*Config, error) {
 		REDIS_PORT:        redisPort,
 		PERIOD:            period,
 		BATCH_SIZE:        batchSize,
+		EXTERNAL_API_URL:  externalApiUrl,
 	}, nil
 }

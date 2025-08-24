@@ -2,6 +2,7 @@ package app
 
 import (
 	"auto-messager/config"
+	"auto-messager/internal/service"
 	"auto-messager/internal/storage"
 	"context"
 	"log"
@@ -15,6 +16,7 @@ type App struct {
 	Config  *config.Config
 	DB      *pgxpool.Pool
 	Queries *storage.Queries
+	Service *service.MessageService
 	HTTP    *http.Server
 }
 
@@ -24,11 +26,13 @@ func NewApp(ctx context.Context, config *config.Config) (*App, error) {
 		return nil, err
 	}
 	queries := storage.New(db)
+	messageService := service.NewMessageService(config.EXTERNAL_API_URL)
 
 	return &App{
 		Config:  config,
 		DB:      db,
 		Queries: queries,
+		Service: messageService,
 	}, nil
 }
 
