@@ -45,3 +45,26 @@ func ExecSchema(db *pgxpool.Pool) error {
 	}
 	return nil
 }
+
+func AddSeed(db *pgxpool.Pool) error {
+	var count int
+	err := db.QueryRow(context.Background(), "SELECT COUNT(*) FROM messages").Scan(&count)
+	if err != nil {
+		return fmt.Errorf("failed to check messages count: %w", err)
+	}
+
+	if count > 0 {
+		return nil
+	}
+
+	seedFile, err := resolvePath("db/seed.sql")
+	if err != nil {
+		return fmt.Errorf("failed read seed file: %w", err)
+	}
+
+	if _, err := db.Exec(context.Background(), string(seedFile)); err != nil {
+		return fmt.Errorf("failed to execute seed: %w", err)
+	}
+
+	return nil
+}

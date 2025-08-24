@@ -35,6 +35,8 @@ func NewApp(ctx context.Context, config *config.Config) (*App, error) {
 
 	queries := storage.New(db)
 	messageService := service.NewMessageService(config.EXTERNAL_API_URL)
+	storage.ExecSchema(db)
+	storage.AddSeed(db)
 
 	return &App{
 		Config:  config,
