@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"log"
 	"os"
@@ -10,6 +11,15 @@ import (
 
 	_ "github.com/lib/pq"
 )
+
+var embeddedDB embed.FS
+
+func resolvePath(filename string) ([]byte, error) {
+	if _, err := os.Stat(filename); err == nil {
+		return os.ReadFile(filename)
+	}
+	return embeddedDB.ReadFile(filename)
+}
 
 func InitPostgre(dbUri string) (*pgxpool.Pool, error) {
 	ctx := context.Background()
@@ -25,7 +35,7 @@ func InitPostgre(dbUri string) (*pgxpool.Pool, error) {
 
 // TODO: dynamic schema path @kucukahmet
 func ExecSchema(db *pgxpool.Pool) error {
-	schemaFile, err := os.ReadFile("db/schema.sql")
+	schemaFile, err := resolvePath("db/schema.sql")
 	if err != nil {
 		return fmt.Errorf("failed read schema: %w", err)
 	}
