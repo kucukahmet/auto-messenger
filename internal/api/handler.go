@@ -19,9 +19,14 @@ func NewHandlers(app *app.App, listener *worker.Listener) *Handlers {
 }
 
 func (handler *Handlers) Ping(writer http.ResponseWriter, request *http.Request) {
+
+	listenerIsRunning := handler.listener.IsRunning()
+
 	response := map[string]interface{}{
-		"status":  "ok",
-		"message": "pong",
+		"status":            "ok",
+		"httpServer":        true,
+		"listenerIsRunning": listenerIsRunning,
+		"message":           "pong",
 	}
 
 	writer.Header().Set("Content-Type", "application/json")
