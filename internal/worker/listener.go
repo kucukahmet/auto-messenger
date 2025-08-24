@@ -2,7 +2,11 @@ package worker
 
 import (
 	"auto-messager/internal/app"
+	"auto-messager/internal/storage"
+	"context"
 	"fmt"
+	"log"
+	"sync"
 	"time"
 )
 
@@ -62,9 +66,32 @@ func (listener *Listener) Stop() error {
 }
 
 func (listener *Listener) action() {
-	// ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	// defer cancel()
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 
-	// storage.GetPendingForUpdate(ctx, listener.period)
+	limit := int32(listener.app.Config.BATCH_SIZE)
+	messages, err := listener.app.Queries.GetPendingForUpdate(ctx, limit)
 
+	if err != nil {
+		fmt.Printf("Error fetching pending messages: %v\n", err)
+		return
+	}
+
+	if len(messages) == 0 {
+		log.Println("No pending messages to process")
+		return
+	}
+
+	fmt.Printf("Fetched %d pending messages\n", len(messages))
+
+	var waitGroup sync.WaitGroup
+	for _, message := range messages {
+		waitGroup.Add(1)
+		go func(msg storage.Message) {
+			defer waitGroup.Done()
+			fmt.Println("Processing message ID:", msg.ID)
+		}(message)
+	}
+	waitGroup.Wait()
+	fmt.Println("All messages processed")
 }
