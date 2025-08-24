@@ -52,6 +52,24 @@ definitions:
       updated_at:
         type: string
     type: object
+  api.NewMessageRequest:
+    properties:
+      content:
+        example: Hello, this is a test message.
+        type: string
+      phone_number:
+        example: +905xxxxxxxx
+        type: string
+    type: object
+  api.NewMessageResponse:
+    properties:
+      message:
+        example: Successfully added new message
+        type: string
+      status:
+        example: ok
+        type: string
+    type: object
   api.PaginatedMessagesResponse:
     properties:
       items:
@@ -86,6 +104,36 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/messages:
+    post:
+      consumes:
+      - application/json
+      description: Adds a new message to the queue for sending
+      parameters:
+      - description: Message to add
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/api.NewMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Message added to queue
+          schema:
+            $ref: '#/definitions/api.NewMessageResponse'
+        "400":
+          description: Invalid request payload
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+        "500":
+          description: Failed to add
+          schema:
+            $ref: '#/definitions/api.ErrorResponse'
+      summary: Add new message
+      tags:
+      - messages
   /api/messages/sent:
     get:
       description: Returns a paginated list of sent messages

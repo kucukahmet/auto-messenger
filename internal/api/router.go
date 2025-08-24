@@ -45,6 +45,7 @@ func Router(app *app.App, listener *worker.Listener) http.Handler {
 		api.Get("/start-listener", handler.StartListener)
 		api.Get("/stop-listener", handler.StopListener)
 		api.Get("/messages/sent", handler.ListSentMessages)
+		api.Post("/messages", handler.AddNewMessage)
 	})
 
 	router.NotFound(func(w http.ResponseWriter, r *http.Request) {

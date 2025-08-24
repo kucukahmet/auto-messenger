@@ -15,6 +15,52 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/messages": {
+            "post": {
+                "description": "Adds a new message to the queue for sending",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "messages"
+                ],
+                "summary": "Add new message",
+                "parameters": [
+                    {
+                        "description": "Message to add",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/api.NewMessageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Message added to queue",
+                        "schema": {
+                            "$ref": "#/definitions/api.NewMessageResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request payload",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to add",
+                        "schema": {
+                            "$ref": "#/definitions/api.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/api/messages/sent": {
             "get": {
                 "description": "Returns a paginated list of sent messages",
@@ -203,6 +249,32 @@ const docTemplate = `{
                 },
                 "updated_at": {
                     "type": "string"
+                }
+            }
+        },
+        "api.NewMessageRequest": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string",
+                    "example": "Hello, this is a test message."
+                },
+                "phone_number": {
+                    "type": "string",
+                    "example": "+905xxxxxxxx"
+                }
+            }
+        },
+        "api.NewMessageResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "Successfully added new message"
+                },
+                "status": {
+                    "type": "string",
+                    "example": "ok"
                 }
             }
         },

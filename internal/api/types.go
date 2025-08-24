@@ -48,3 +48,15 @@ type PaginatedMessagesResponse struct {
 	Offset        int               `json:"offset" example:"0"`
 	ReturnedCount int               `json:"returned_count" example:"20"`
 }
+
+// NewMessageRequest swagger:model
+type NewMessageRequest struct {
+	PhoneNumber string `json:"phone_number" example:"+905xxxxxxxx"`
+	Content     string `json:"content" example:"Hello, this is a test message."`
+}
+
+// NewMessageResponse swagger:model
+type NewMessageResponse struct {
+	Status  string `json:"status" example:"ok"`
+	Message string `json:"message" example:"Successfully added new message"`
+}

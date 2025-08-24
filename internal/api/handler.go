@@ -143,3 +143,40 @@ func (handler *Handlers) ListSentMessages(writer http.ResponseWriter, request *h
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(messages)
 }
+
+// AddNewMessage godoc
+// @Summary      Add new message
+// @Description  Adds a new message to the queue for sending
+// @Tags         messages
+// @Accept       json
+// @Produce      json
+// @Param        message  body      api.NewMessageRequest	true  "Message to add"
+// @Success      201      {object}  api.NewMessageResponse "Message added to queue"
+// @Failure      400      {object}  api.ErrorResponse    "Invalid request payload"
+// @Failure      500      {object}  api.ErrorResponse    "Failed to add
+// @Router       /api/messages [post]
+func (handler *Handlers) AddNewMessage(writer http.ResponseWriter, request *http.Request) {
+	var newMessageReq NewMessageRequest
+	err := json.NewDecoder(request.Body).Decode(&newMessageReq)
+	if err != nil {
+		http.Error(writer, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+
+	_, err = handler.app.Queries.InsertMessage(request.Context(), storage.InsertMessageParams{
+		PhoneNumber: newMessageReq.PhoneNumber,
+		Content:     newMessageReq.Content,
+	})
+
+	if err != nil {
+		http.Error(writer, "Failed to add message to queue", http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Set("Content-Type", "application/json")
+	writer.WriteHeader(http.StatusCreated)
+	json.NewEncoder(writer).Encode(map[string]interface{}{
+		"status":  "ok",
+		"message": "Message added to queue",
+	})
+}
