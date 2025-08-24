@@ -9,6 +9,8 @@ import (
 )
 
 type Config struct {
+	API_VERSION       string
+	BUILD_VERSION     string
 	HTTP_PORT         string
 	DB_URI            string
 	POSTGRES_USER     string
@@ -33,6 +35,9 @@ func getEnv(key, defaultValue string) string {
 func Load() (*Config, error) {
 	godotenv.Load()
 
+	apiVersion := "v1"
+
+	buildVersion := getEnv("BUILD_VERSION", "dev")
 	httpPort := getEnv("HTTP_PORT", "8080")
 	postgresUser := getEnv("POSTGRES_USER", "auto")
 	postgresPassword := getEnv("POSTGRES_PASSWORD", "messager")
@@ -57,6 +62,8 @@ func Load() (*Config, error) {
 	redisUri := fmt.Sprintf("%s:%s", redisHost, redisPort)
 
 	return &Config{
+		API_VERSION:       apiVersion,
+		BUILD_VERSION:     buildVersion,
 		HTTP_PORT:         httpPort,
 		DB_URI:            dbUri,
 		POSTGRES_USER:     postgresUser,
