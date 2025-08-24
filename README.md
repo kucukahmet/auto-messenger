@@ -79,8 +79,23 @@ sqlc generate
 
 Code will be in `internal/storage`.
 
----
 
+## Load Test
+You can do load testing with Grafana K6
+
+Install:
+
+```bash
+https://grafana.com/docs/k6/latest/set-up/install-k6/
+```
+
+Test:
+
+```bash
+k6 run -e BASE_URL=http://localhost:8081/api loadtest.js
+```
+
+---
 ### 2. Swagger
 
 **swag** create Swagger / OpenAPI doc from comments in Go handlers.
