@@ -31,6 +31,7 @@ func main() {
 	listener := worker.NewListener(mainApp)
 	router := api.Router(mainApp, listener)
 	mainApp.StartHTTP(router)
+	listener.Start()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

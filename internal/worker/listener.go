@@ -87,6 +87,13 @@ func (listener *Listener) action() {
 
 	var waitGroup sync.WaitGroup
 	for _, message := range messages {
+
+		if listener.app.Cache.Get(ctx, fmt.Sprintf("message:%d", message.ID)).Val() != "" {
+			fmt.Printf("Message ID %d is already being processed, skipping...\n", message.ID)
+			continue
+		}
+
+		listener.app.Cache.Set(ctx, fmt.Sprintf("message:%d", message.ID), "processing", 10*time.Minute)
 		waitGroup.Add(1)
 		go func(msg storage.Message) {
 			defer waitGroup.Done()
@@ -112,6 +119,7 @@ func (listener *Listener) action() {
 				ID:                msg.ID,
 				ResponseMessageID: wresponse.MessageID,
 			})
+			listener.app.Cache.Set(ctx, fmt.Sprintf("message:%d", msg.ID), wresponse.MessageID, 10*time.Minute)
 			fmt.Printf("Sent message ID %d, response status: %v -> %v\n", msg.ID, wresponse.Message, wresponse.MessageID)
 
 			fmt.Println("Processing message ID:", msg.ID)
